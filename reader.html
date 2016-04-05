@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		body {
+			background: black;
+			cursor: none;
+			overflow: hidden;
+		}
+		.container {
+			overflow: hidden;
+		}
+		img {
+			display: block;
+			margin: 0 auto;
+		}
+		.show-cursor {
+			cursor: auto;
+			overflow: auto;
+		}
+		@supports (-webkit-appearance:none) {
+			body {
+				overflow: auto;
+			}
+		}
+	</style>
+	<style id="hide-cursor-style">
+		::-webkit-scrollbar {
+			display: none;
+		}
+	</style>
+	<script src="https://code.jquery.com/jquery-2.2.2.js"></script>
+	<script>
+		$.get("images", function(list){
+			for (name of list) {
+				$("<img src='" + name + "'>").appendTo(".images");
+			};
+		});
+		
+		function go(direction) {
+			$.get(direction, function(res){
+				if (res.end) {
+					alert("沒有了！");
+				} else {
+					location.href = res.url;
+				}
+			});
+		}
+		
+		function handleKeydown(e) {
+			if (e.which == 221) {
+				go("next");
+			} else if (e.which == 219) {
+				go("back");
+			}
+		}
+		
+		var cursor = function(){
+			var timer, x, y, hideStyle = $("#hide-cursor-style");
+			
+			function show(e) {
+				var w = $(window).width();
+				$("body").addClass("show-cursor");
+				hideStyle.remove();
+				$(".images").css("margin-right", $(window).width() - w + "px");
+				timer = setTimeout(hide, 1000);
+			}
+			
+			function hide() {
+				hideStyle.appendTo("head");
+				$("body").removeClass("show-cursor");
+				$(".images").css("margin-right", "");
+				timer = null;
+			}
+			
+			function handleMove(e) {
+				// sometimes e.screenX and e.screenY will be 0
+				if (!e.screenX && !e.screenY) {
+					return
+				}
+				if (x == null && y == null) {
+					x = e.screenX;
+					y = e.screenY;
+					return;
+				}
+				// chrome fires move event even not moving
+				if (e.screenX == x && e.screenY == y) {
+					return;
+				}
+				x = e.screenX;
+				y = e.screenY;
+				if (timer) {
+					clearTimeout(timer);
+					timer = setTimeout(hide, 1000);
+					return;
+				}
+				show();
+			}
+		
+			return {
+				handleMove: handleMove
+			};
+		}();
+		
+		$(document).keydown(handleKeydown);
+		$(document).mousemove(cursor.handleMove);
+	</script>
+</head>
+<body>
+	<div class="container">
+		<div class="images"></div>
+	</div>
+</body>
+</html>

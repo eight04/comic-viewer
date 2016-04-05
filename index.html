@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script src="https://code.jquery.com/jquery-2.2.2.js"></script>
+	<script>
+		$.get("list", function(list){
+			for (name of list) {
+				$("<a href='" + name + "/'>" + name + "</a><br>").appendTo("body");
+			};
+		});
+	</script>
+</head>
+<body>
+</body>
+</html>
