@@ -1,7 +1,7 @@
 var doc = `Comic Viewer
 
 Usage
-  comic-viewer [--port <port>] [--no-server] <file>
+  comic-viewer [--port <port>] [--no-server] [--path <file>]
   comic-viewer --help | --version
   
 Options:
@@ -11,19 +11,31 @@ Options:
   --version    Show version number.`;
 
 var docopt = require("docopt"),
-	arguments = docopt(doc, {version: "0.1.0"});
-	webViewer = require("web-viewer"),
-	opener = require("opener"),
-	app = webViewer(),
-	PORT = 8080;
+	args = docopt(doc, {version: "0.1.0"});
+	
+function startServer() {	
+	var webViewer = require("web-viewer"),
+	
+	webViewer(
+		args["--port"],
+		function(req, res){
+			res.locals.dumps = JSON.stringify(res.locals);
+			res.render("viewer.ejs");
+		},
+		launchFile
+	);
+}
 
-app.file(function(req, res){
-	// render reader
-	// req.path ...
-});
+function launchFile() {
+	if (!args["--path"]) {
+		return;
+	}
+	var opener = require("opener");
+	opener("http://localhost:" + args["--port"] + "/view?path=" + encodeURIComponent(args["--path"]));
+}
 
-app.dir(function(req, res){
-	// render file list
-});
-
-app.listen(PORT);
+if (!args["--no-server"]) {
+	startServer();
+} else {
+	launchFile();
+}
