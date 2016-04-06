@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Document</title>
+	<title><%= curr.name %></title>
 	<style>
 		body {
 			background: black;
 			cursor: none;
 			overflow: hidden;
+			color: white;
 		}
 		.container {
 			overflow: hidden;
@@ -21,9 +22,6 @@
 			cursor: auto;
 			overflow: auto;
 		}
-		.controls {
-			text-align: center;
-		}
 		a {
 			color: white;
 			text-decoration: none;
@@ -33,11 +31,43 @@
 			background-color: #666;
 		}
 		.controls {
-			padding: 1em;
+			text-align: center;
+			margin: 1em;
 		}
 		.controls a {
 			display: inline-block;
 			padding: 0.3em 0.6em;
+		}
+		.dirs a {
+			display: block;
+			padding: 0.3em 0.6em;
+			margin: 0.6em 0;
+		}
+		.nav {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			text-align: center;
+			background: #444;
+			line-height: 1;
+			vertical-align: middle;
+		}
+		.nav a {
+			display: inline-block;
+			padding: 1em;
+			vertical-align: middle;
+		}
+		.show-cursor .nav {
+			display: block;
+		}
+		.right {
+			position: absolute;
+			right: 1em;
+		}
+		.left {
+			float: left;
 		}
 		@supports (-webkit-appearance:none) {
 			body {
@@ -75,7 +105,7 @@
 					scrTop = $(window).scrollTop();
 				$("body").addClass("show-cursor");
 				hideStyle.remove();
-				$(".container-inner").css("margin-right", $(window).width() - w + "px");
+				$(".container-inner, .nav").css("margin-right", $(window).width() - w + "px");
 				$(window).scrollTop(scrTop);
 				timer = setTimeout(hide, 1000);
 			}
@@ -83,7 +113,7 @@
 			function hide() {
 				hideStyle.appendTo("head");
 				$("body").removeClass("show-cursor");
-				$(".container-inner").css("margin-right", "");
+				$(".container-inner, .nav").css("margin-right", "");
 				timer = null;
 			}
 			
@@ -123,6 +153,10 @@
 <body>
 	<div class="container">
 		<div class="container-inner">
+			<div class="nav">
+				<a class="title main"><%= curr.name %></a>
+				<a class="command-explorer right">Open in explorer</a>
+			</div>
 			<div class="images">
 				<% files.forEach(function(file){ %>
 					<img src="/src?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>">
@@ -135,11 +169,11 @@
 			</div>
 			<div class="controls">
 				<% if (prev) { %>
-					<a href="/view?path=<%= encodeURIComponent(prev.full) %>" id="prev">Prev</a>
+					<a href="/view?path=<%= encodeURIComponent(prev.full) %>" id="prev" title="<%= prev.name %>">Prev</a>
 				<% } %>
-				<a href="/view?path=<%= encodeURIComponent(curr.dir) %>">..</a>
+				<a href="/view?path=<%= encodeURIComponent(curr.dir) %>" title="<%= curr.dirname %>">..</a>
 				<% if (next) { %>
-					<a href="/view?path=<%= encodeURIComponent(next.full) %>" id="next">Next</a>
+					<a href="/view?path=<%= encodeURIComponent(next.full) %>" id="next" title="<%= next.name %>">Next</a>
 				<% } %>
 			</div>
 		</div>

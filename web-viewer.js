@@ -48,6 +48,7 @@ function createWebViewer(app){
 		// basic information
 		var curr = res.locals.curr = {
 			dir: path.dirname(req.query.path),
+			dirname: path.basename(path.dirname(req.query.path)),
 			full: req.query.path,
 			name: path.basename(req.query.path)
 		};
