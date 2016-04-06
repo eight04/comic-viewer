@@ -252,6 +252,10 @@
 				} else {
 					bookmark.add();
 				}
+			} else if (e.which == 13) {
+				if (e.ctrlKey) {
+					explorer.open();
+				}
 			}
 		}
 		
@@ -314,6 +318,23 @@
 			return {
 				handleMove: handleMove,
 				notify: notify
+			};
+		}();
+		
+		var explorer = function(){
+			function bind() {
+				$(".command-explorer").click(open);
+			}
+			
+			function open() {
+				$.post("/open", {path: encodeURIComponent(cv.isFile ? cv.curr.dir : cv.curr.full)});
+				panel.notify("Launch directory");
+			}
+			
+			$(bind);
+			
+			return {
+				open: open
 			};
 		}();
 		

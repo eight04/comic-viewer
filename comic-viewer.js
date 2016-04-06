@@ -18,6 +18,8 @@ var docopt = require("docopt"),
 function startServer() {	
 	var express = require("express"),
 		createWV = require("./web-viewer"),
+		bodyParser = require("body-parser"),
+		opener = require("opener"),
 		app = express();
 		
 	app.use("/jquery", express.static("bower_components/jquery/dist"));
@@ -32,6 +34,18 @@ function startServer() {
 			prev: res.locals.prev
 		});
 		res.render("viewer.ejs");
+	});
+	
+	app.use(bodyParser.json());
+	app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+	  extended: true
+	})); 
+	
+	app.post("/open", function(req, res){
+		if (req.body.path) {
+			req.body.path = decodeURIComponent(req.body.path);
+			opener(req.body.path);
+		}
 	});
 	
 	app.listen(args["--port"], launchFile).on("error", handleError);
