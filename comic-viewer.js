@@ -14,18 +14,18 @@ var docopt = require("docopt"),
 	args = docopt(doc, {version: "0.0.0"}),;
 	
 function startServer() {	
-	var webViewer = require("web-viewer"),
-		express = require("express"),
-		wv = webViewer(
-			args["--port"],
-			function(req, res){
-				res.locals.dumps = JSON.stringify(res.locals);
-				res.render("viewer.ejs");
-			},
-			launchFile
-		);
+	var express = require("express"),
+		createWV = require("web-viewer"),
+		app = createWV(express());
 		
-	wv.app.use("/jquery", express.static("bower_components/jquery/dist"));
+	app.use("/jquery", express.static("bower_components/jquery/dist"));
+	
+	app.get("/view", function(req, res){
+		res.locals.dumps = JSON.stringify(res.locals);
+		res.render("viewer.ejs");
+	});
+	
+	app.listen(args["--port"], launchFile);
 }
 
 function launchFile() {
