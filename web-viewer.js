@@ -1,4 +1,3 @@
-//Lets require/import the HTTP module
 var fs = require("fs"),
 	express = require("express"),
 	path = require("path");
