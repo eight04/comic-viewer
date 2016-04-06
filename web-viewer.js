@@ -5,8 +5,6 @@ var fs = require("fs"),
 function createWebViewer(port, reqCallback, listenCallback){
 	var app = express();
 	
-	app.use(express.static("public"));
-	
 	app.all("*", function(req, res, next){
 		if (!req.query.path) {
 			res.sendStatus(404);
@@ -106,6 +104,10 @@ function createWebViewer(port, reqCallback, listenCallback){
 	}
 	
 	app.listen(port, listenCallback);
+	
+	return {
+		app: app
+	};
 }
 
 module.export = createWebViewer;
