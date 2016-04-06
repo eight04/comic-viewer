@@ -1,0 +1,25 @@
+{
+  "name": "comic-viewer",
+  "version": "0.0.0",
+  "description": "Comic Viewer\r ============\r A small script to serve a folder as an comic viewer webpage.",
+  "main": "comic-viewer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eight04/comic-viewer.git"
+  },
+  "author": "eight04 <eight04@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eight04/comic-viewer/issues"
+  },
+  "homepage": "https://github.com/eight04/comic-viewer#readme",
+  "dependencies": {
+    "docopt": "^0.6.2",
+    "ejs": "^2.4.1",
+    "express": "^4.13.4",
+    "opener": "^1.4.1"
+  }
+}
