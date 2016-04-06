@@ -35,12 +35,11 @@ function fnCmp(a, b) {
 }
 
 function createWebViewer(app){
+	
 	app.all("*", function(req, res, next){
-		if (!req.query.path) {
-			res.sendStatus(404);
-			return;
+		if (req.query.path) {
+			req.query.path = path.normalize(req.query.path);
 		}
-		req.query.path = path.normalize(req.query.path);
 		next();
 	});
 	
