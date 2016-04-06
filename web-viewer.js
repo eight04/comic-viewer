@@ -1,10 +1,7 @@
 var fs = require("fs"),
-	express = require("express"),
 	path = require("path");
 
-function createWebViewer(port, reqCallback, listenCallback){
-	var app = express();
-	
+function createWebViewer(app){
 	app.all("*", function(req, res, next){
 		if (!req.query.path) {
 			res.sendStatus(404);
@@ -80,7 +77,7 @@ function createWebViewer(port, reqCallback, listenCallback){
 				next();
 			});
 		});
-	}, reqCallback);
+	});
 	
 	app.get("/src", function(req, res) {
 		fs.stat(req.query.path, function(err, stat){
@@ -103,11 +100,7 @@ function createWebViewer(port, reqCallback, listenCallback){
 		});
 	}
 	
-	app.listen(port, listenCallback);
-	
-	return {
-		app: app
-	};
+	return app;
 }
 
 module.export = createWebViewer;
