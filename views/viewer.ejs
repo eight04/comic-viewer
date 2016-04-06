@@ -15,10 +15,29 @@
 		img {
 			display: block;
 			margin: 0 auto;
+			max-width: 100%;
 		}
 		.show-cursor {
 			cursor: auto;
 			overflow: auto;
+		}
+		.controls {
+			text-align: center;
+		}
+		a {
+			color: white;
+			text-decoration: none;
+			background-color: #444;
+		}
+		a:hover {
+			background-color: #666;
+		}
+		.controls {
+			padding: 1em;
+		}
+		.controls a {
+			display: inline-block;
+			padding: 0.3em 0.6em;
 		}
 		@supports (-webkit-appearance:none) {
 			body {
@@ -31,48 +50,40 @@
 			display: none;
 		}
 	</style>
-	<script src="/jquery-2.2.2.js"></script>
+	<script src="/jquery/jquery.js"></script>
 	<script>
-		cv = <%- dumps %>;
+		var cv = <%- comicViewer %>;
 		
 		// check isfile
 		if (cv.isFile) {
-			location.href = "/view?path=" + encodeURIComponent(cv.dirname) + "#" + cv.basename;
-		}
-		
-		function go(direction) {
-			$.get(direction, function(res){
-				if (res.end) {
-					alert("沒有了！");
-				} else {
-					location.href = res.url;
-				}
-			});
+			location.href = "/view?path=" + encodeURIComponent(cv.curr.dir) + "#" + cv.curr.name;
 		}
 		
 		function handleKeydown(e) {
 			if (e.which == 221) {
-				go("next");
+				location.href = "/view?path=" + encodeURIComponent(cv.next.full);
 			} else if (e.which == 219) {
-				go("back");
+				location.href = "/view?path=" + encodeURIComponent(cv.prev.full);
 			}
 		}
 		
-		var cursor = function(){
+		var panel = function(){
 			var timer, x, y, hideStyle = $("#hide-cursor-style");
 			
 			function show(e) {
-				var w = $(window).width();
+				var w = $(window).width(),
+					scrTop = $(window).scrollTop();
 				$("body").addClass("show-cursor");
 				hideStyle.remove();
-				$(".images").css("margin-right", $(window).width() - w + "px");
+				$(".container-inner").css("margin-right", $(window).width() - w + "px");
+				$(window).scrollTop(scrTop);
 				timer = setTimeout(hide, 1000);
 			}
 			
 			function hide() {
 				hideStyle.appendTo("head");
 				$("body").removeClass("show-cursor");
-				$(".images").css("margin-right", "");
+				$(".container-inner").css("margin-right", "");
 				timer = null;
 			}
 			
@@ -106,20 +117,31 @@
 		}();
 		
 		$(document).keydown(handleKeydown);
-		$(document).mousemove(cursor.handleMove);
+		$(document).mousemove(panel.handleMove);
 	</script>
 </head>
 <body>
 	<div class="container">
-		<div class="images">
-			<% files.forEach(function(file){ %>
-				<img src="/src?path=<%= encodeURIComponent(dirname + "/" + file) %>" id="<%= file %>">
-			<% }) %>
-		</div>
-		<div class="dirs">
-			<% dirs.forEach(function(file){ %>
-				<a href="/view?path=<%= encodeURIComponent(dirname + "/" + file) %>"><%= file %></a>
-			<% }) %>
+		<div class="container-inner">
+			<div class="images">
+				<% files.forEach(function(file){ %>
+					<img src="/src?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>">
+				<% }) %>
+			</div>
+			<div class="dirs">
+				<% dirs.forEach(function(file){ %>
+					<a href="/view?path=<%= encodeURIComponent(file.full) %>"><%= file.name %></a>
+				<% }) %>
+			</div>
+			<div class="controls">
+				<% if (prev) { %>
+					<a href="/view?path=<%= encodeURIComponent(prev.full) %>" id="prev">Prev</a>
+				<% } %>
+				<a href="/view?path=<%= encodeURIComponent(curr.dir) %>">..</a>
+				<% if (next) { %>
+					<a href="/view?path=<%= encodeURIComponent(next.full) %>" id="next">Next</a>
+				<% } %>
+			</div>
 		</div>
 	</div>
 </body>
