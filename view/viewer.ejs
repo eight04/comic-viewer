@@ -31,13 +31,14 @@
 			display: none;
 		}
 	</style>
-	<script src="https://code.jquery.com/jquery-2.2.2.js"></script>
+	<script src="/jquery-2.2.2.js"></script>
 	<script>
-		$.get("images", function(list){
-			for (name of list) {
-				$("<img src='" + name + "'>").appendTo(".images");
-			};
-		});
+		cv = <%- dumps %>;
+		
+		// check isfile
+		if (cv.isFile) {
+			location.href = "/view?path=" + encodeURIComponent(cv.dirname) + "#" + cv.basename;
+		}
 		
 		function go(direction) {
 			$.get(direction, function(res){
@@ -110,7 +111,16 @@
 </head>
 <body>
 	<div class="container">
-		<div class="images"></div>
+		<div class="images">
+			<% files.forEach(function(file){ %>
+				<img src="/src?path=<%= encodeURIComponent(dirname + "/" + file) %>" id="<%= file %>">
+			<% }) %>
+		</div>
+		<div class="dirs">
+			<% dirs.forEach(function(file){ %>
+				<a href="/view?path=<%= encodeURIComponent(dirname + "/" + file) %>"><%= file %></a>
+			<% }) %>
+		</div>
 	</div>
 </body>
 </html>
