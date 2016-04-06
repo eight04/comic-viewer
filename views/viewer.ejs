@@ -27,7 +27,8 @@
 			text-decoration: none;
 			background-color: #444;
 		}
-		a:hover {
+		a:hover,
+		a.active {
 			background-color: #666;
 		}
 		.controls {
@@ -54,6 +55,9 @@
 			line-height: 1;
 			vertical-align: middle;
 		}
+		.nav:hover {
+			display: block;
+		}
 		.nav a {
 			display: inline-block;
 			padding: 1em;
@@ -65,9 +69,32 @@
 		.right {
 			position: absolute;
 			right: 1em;
+			top: 0;
+		}
+		.right > a {
+			float: right;
 		}
 		.left {
 			float: left;
+		}
+		.notify {
+			background: #444;
+			padding: 1em;
+			position: fixed;
+			top: 2em;
+			right: 2em;
+			width: 16em;
+			display: none;
+		}
+		.bookmark-menu {
+			display: none;
+			margin-top: 3em;
+		}
+		.bookmark-menu a {
+			display: block;
+		}
+		.show {
+			display: block;
 		}
 		@supports (-webkit-appearance:none) {
 			body {
@@ -82,18 +109,149 @@
 	</style>
 	<script src="/jquery/jquery.js"></script>
 	<script>
-		var cv = <%- comicViewer %>;
+		var cv = <%- comicViewer %>,
+			match;
 		
 		// check isfile
 		if (cv.isFile) {
 			location.href = "/view?path=" + encodeURIComponent(cv.curr.dir) + "#" + cv.curr.name;
 		}
 		
+		var bookmark = function(){
+			var MAX_LENGTH = 20,
+				scrTop;
+			
+			function read() {
+				var bookmarks;
+				try {
+					bookmarks = JSON.parse(localStorage.bookmarks);
+					if (!(bookmarks instanceof Array)) {
+						bookmarks = [];
+					}
+				} catch (err) {
+					bookmarks = [];
+				}
+				return bookmarks;
+			}
+			
+			function save(bookmarks) {
+				localStorage.bookmarks = JSON.stringify(bookmarks);
+			}
+		
+			function add() {
+				var bookmarks = read(),
+					bookmark = {
+						path: cv.curr.full,
+						scrTop: $(window).scrollTop(),
+						name: cv.curr.name
+					};
+				
+				bookmarks.push(bookmark);
+				addMenuItem(bookmark);
+				
+				save(bookmarks);
+				
+				panel.notify("Saved bookmark: " + cv.curr.full);
+			}
+			
+			function load() {
+				var bookmarks = read(),
+					last = bookmarks[bookmarks.length - 1];
+					
+				if (!last) {
+					panel.notify("Bookmark is empty");
+				} else if (last.path == cv.curr.full) {
+					scrTop = last.scrTop;
+					open();
+				} else {
+					location.href = "/view?path=" + encodeURIComponent(last.path) + "#SCRTOP" + last.scrTop;
+				}
+			}
+			
+			function open() {
+				$(window).scrollTop(scrTop);
+				if ($(window).scrollTop() != scrTop) {
+					setTimeout(open, 200);
+				} else {
+					panel.notify("Bookmark opened: " + cv.curr.full);
+					history.pushState("", document.title, window.location.pathname + window.location.search);
+				}
+			}
+			
+			function createMenu() {
+				var bookmarks = read(),
+					i;
+					
+				for (i = 0; i < bookmarks.length; i++) {
+					addMenuItem(bookmarks[i]);
+				}
+			}
+			
+			function addMenuItem(bookmark) {
+				$("<a/>", {
+					href: "/view?path=" + encodeURIComponent(bookmark.path) + "#SCRTOP" + bookmark.scrTop,
+					text: bookmark.name
+				}).prependTo(".bookmark-menu");
+			}
+			
+			function hashOpen() {
+				var match;
+				if (match = location.hash.match(/^#SCRTOP(\d+)/)) {
+					scrTop = match[1];
+					open();
+				}			
+			}
+			
+			function init() {
+				hashOpen();
+				createMenu();
+				
+				$(".command-bookmarks").click(showMenu);
+				$(window).on("hashchange", hashOpen);
+			}
+			
+			function showMenu() {
+				$(".nav").addClass("show");
+				$(".command-bookmarks").addClass("active");
+				$(".bookmark-menu").addClass("show");
+				setTimeout(bindHideMenu);
+			}
+			
+			function bindHideMenu() {
+				$(window).one("click", hideMenu);
+			}
+			
+			function hideMenu() {
+				$(".nav").removeClass("show");
+				$(".command-bookmarks").removeClass("active");
+				$(".bookmark-menu").removeClass("show");
+			}
+			
+			$(init);
+		
+			return {
+				load: load,
+				add: add
+			};
+		}();
+		
 		function handleKeydown(e) {
 			if (e.which == 221) {
+				// go next folder "["
 				location.href = "/view?path=" + encodeURIComponent(cv.next.full);
 			} else if (e.which == 219) {
+				// go prev folder "]"
 				location.href = "/view?path=" + encodeURIComponent(cv.prev.full);
+			} else if (e.which == 81) {
+				// go parent dir "Q"
+				location.href = "/view?path=" + encodeURIComponent(cv.curr.dir) + "#" + cv.curr.name;
+			} else if (e.which == 66) {
+				// bookmark "B"
+				if (e.shiftKey) {
+					bookmark.load();
+				} else {
+					bookmark.add();
+				}
 			}
 		}
 		
@@ -140,9 +298,22 @@
 				}
 				show();
 			}
+			
+			var notifyTimer;
+			function notify(s) {
+				clearTimeout(notifyTimer);
+				$(".notify").text(s);
+				$(".notify").addClass("show");
+				notifyTimer = setTimeout(denotify, 1000);
+			}
+			
+			function denotify() {
+				$(".notify").removeClass("show");
+			}
 		
 			return {
-				handleMove: handleMove
+				handleMove: handleMove,
+				notify: notify
 			};
 		}();
 		
@@ -155,7 +326,11 @@
 		<div class="container-inner">
 			<div class="nav">
 				<a class="title main"><%= curr.name %></a>
-				<a class="command-explorer right">Open in explorer</a>
+				<div class="right">
+					<a class="command-explorer">Explorer</a>
+					<a class="command-bookmarks">Bookmarks</a>
+					<div class="bookmark-menu"></div>
+				</div>
 			</div>
 			<div class="images">
 				<% files.forEach(function(file){ %>
@@ -164,19 +339,22 @@
 			</div>
 			<div class="dirs">
 				<% dirs.forEach(function(file){ %>
-					<a href="/view?path=<%= encodeURIComponent(file.full) %>"><%= file.name %></a>
+					<a href="/view?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>"><%= file.name %></a>
 				<% }) %>
 			</div>
 			<div class="controls">
 				<% if (prev) { %>
 					<a href="/view?path=<%= encodeURIComponent(prev.full) %>" id="prev" title="<%= prev.name %>">Prev</a>
 				<% } %>
-				<a href="/view?path=<%= encodeURIComponent(curr.dir) %>" title="<%= curr.dirname %>">..</a>
+				<a href="/view?path=<%= encodeURIComponent(curr.dir) + "#" + curr.name %>" title="<%= curr.dirname %>">..</a>
 				<% if (next) { %>
 					<a href="/view?path=<%= encodeURIComponent(next.full) %>" id="next" title="<%= next.name %>">Next</a>
 				<% } %>
 			</div>
 		</div>
+	</div>
+	<div class="layers">
+		<div class="notify"></div>
 	</div>
 </body>
 </html>
