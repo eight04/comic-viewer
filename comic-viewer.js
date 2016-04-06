@@ -11,19 +11,21 @@ Options:
   --version    Show version number.`;
 
 var docopt = require("docopt"),
-	args = docopt(doc, {version: "0.1.0"});
+	args = docopt(doc, {version: "0.0.0"}),;
 	
 function startServer() {	
 	var webViewer = require("web-viewer"),
-	
-	webViewer(
-		args["--port"],
-		function(req, res){
-			res.locals.dumps = JSON.stringify(res.locals);
-			res.render("viewer.ejs");
-		},
-		launchFile
-	);
+		express = require("express"),
+		wv = webViewer(
+			args["--port"],
+			function(req, res){
+				res.locals.dumps = JSON.stringify(res.locals);
+				res.render("viewer.ejs");
+			},
+			launchFile
+		);
+		
+	wv.app.use("/jquery", express.static("bower_components/jquery/dist"));
 }
 
 function launchFile() {
