@@ -2,12 +2,10 @@ var fs = require("fs"),
 	express = require("express"),
 	path = require("path");
 
-function createWebViewer(){
-	var app = express(),
-		userHandler = {
-			file: null,
-			dir: null
-		};
+function createWebViewer(port, reqCallback, listenCallback){
+	var app = express();
+	
+	app.use(express.static("public"));
 	
 	app.all("*", function(req, res, next){
 		if (!req.query.path) {
@@ -24,7 +22,7 @@ function createWebViewer(){
 		res.locals.dirname = path.dirname(req.query.path),
 		res.locals.basename = path.basename(req.query.path);
 		
-		// read parent dir
+		// read parent dir, get prev, next
 		if (res.locals.dirname == req.query.path) {
 			next();
 			return;
@@ -41,20 +39,50 @@ function createWebViewer(){
 			
 			next();
 		});
-	}, function(req, res) {
-		// route to file or dir
+	}, function(req, res, next) {
+		// get stats
 		fs.stat(req.query.path, function(err, stat){
 			if (err) {
 				res.sendStatus(404);
 				return;
 			}
-			if (stat.isFile()) {
-				viewFile(req, res);
-			} else {
-				viewDir(req, res);
-			}
+			res.locals.isFile = stat.isFile();
+			next();
 		});
-	});
+	}, function(req, res, next) {
+		// get dir info
+		if (res.locals.isFile) {
+			res.locals.files = [res.locals.basename];
+			next();
+			return;
+		}
+		fs.readdir(req.query.path, function(err, files) {
+			if (err) {
+				res.sendStatus(500);
+				return;
+			}
+			var i, promises = [];
+			for (i = 0; i < files.length; i++) {
+				promises.push(getStats(path.join(res.locals.path, files[i]), {
+					name: files[i],
+					isFile: null
+				}));
+			}
+			Promise.all(promises).then(function(values){
+				var files = [], dirs = [], i;
+				for (i = 0; i < values.length; i++) {
+					if (values[i].isFile) {
+						files.push(values[i].name);
+					} else {
+						dirs.push(values[i].name);
+					}
+				}
+				res.locals.files = files;
+				res.locals.dirs = dirs;
+				next();
+			});
+		});
+	}, reqCallback);
 	
 	app.get("/src", function(req, res) {
 		fs.stat(req.query.path, function(err, stat){
@@ -66,39 +94,18 @@ function createWebViewer(){
 		});
 	});
 	
-	function viewFile(req, res) {
-		userHandler.file(req, res);
-	}
-	
-	function viewDir(req, res) {
-		// read dir
-		fs.readdir(req.query.path, function(err, files) {
-			if (err) {
-				res.sendStatus(500);
-				return;
-			}
-			res.locals.files = files;
-			userHandler.dir(req, res);
+	function getStats(fn, file) {
+		return new Promise(function(resolve, reject){
+			fs.stat(fn, function(err, stat){
+				if (err) {
+					file.isFile = stat.isFile()
+				}
+				resolve(file);
+			});
 		});
 	}
 	
-	function file(callback) {
-		userHandler.file = callback;
-	}
-	
-	function dir() {
-		userHandler.dir = callback;
-	}
-	
-	function listen() {
-		app.listen.apply(app, arguments);
-	}
-	
-	return {
-		file: file,
-		dir: dir,
-		listen: listen
-	};
+	app.listen(port, listenCallback);
 }
 
 module.export = createWebViewer;
