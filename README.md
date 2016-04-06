@@ -13,6 +13,11 @@ Todos
 * Package the script as a native app?
 	- Get image path via URL
 * Navigate buttons (next folder, pre folder, back to list)
+* Open in explorer
+* Esc to exit (is this possible?)
+
+/view?path=PATH
+/src?path=PATH
 
 Related apps
 ------------
