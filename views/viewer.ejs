@@ -118,7 +118,7 @@
 		}
 		
 		var bookmark = function(){
-			var MAX_LENGTH = 20,
+			var MAX_LENGTH = 10,
 				scrTop;
 			
 			function read() {
@@ -135,6 +135,9 @@
 			}
 			
 			function save(bookmarks) {
+				while (bookmarks.length > MAX_LENGTH) {
+					bookmarks.shift();
+				}				
 				localStorage.bookmarks = JSON.stringify(bookmarks);
 			}
 		
