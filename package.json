@@ -15,7 +15,7 @@
 	"preversion": "npm test",
     "version": "npm run sync-version && git add .",
 	"postversion": "git push --follow-tags",
-	"install": "npm run bower install"
+	"postinstall": "bower install"
   },
   "repository": {
     "type": "git",
