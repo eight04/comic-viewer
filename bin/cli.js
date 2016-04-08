@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var doc = `Comic Viewer
 
 Usage:
@@ -38,6 +39,7 @@ function launchFile() {
 }
 
 function createLock() {
+	console.log("Server started at port:" + args["--port"]);
 	mkdirp(appDir, function(err) {
 		if (err && err.code != "EEXIST") {
 			console.err(err);
@@ -82,6 +84,10 @@ function init() {
 		process.kill(server.pid);
 	}
 	launchFile();
+}
+
+if (args["<file>"]) {
+	args["<file>"] = path.join(process.cwd(), args["<file>"]);
 }
 
 process.chdir(path.join(__dirname, ".."));
