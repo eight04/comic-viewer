@@ -9,12 +9,10 @@ Dependencies
 
 Todos
 -----
-* Bookmark
-* Package the script as a native app?
-	- Get image path via URL
-* Navigate buttons (next folder, pre folder, back to list)
-* Open in explorer
-* Esc to exit (is this possible?)
+* In firefox with overflow hidden, the search next won't jump to correct position.
+* Smart page up/page down.
+* Smart left/right.
+* Filter.
 
 /view?path=PATH
 /src?path=PATH
