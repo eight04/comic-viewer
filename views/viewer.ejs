@@ -10,6 +10,9 @@
 			overflow: hidden;
 			color: white;
 		}
+		.images {
+			min-height: 3em;
+		}
 		.container {
 			overflow: hidden;
 		}
@@ -357,9 +360,11 @@
 				</div>
 			</div>
 			<div class="images">
-				<% files.forEach(function(file){ %>
-					<img src="/src?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>">
-				<% }) %>
+				<% files.forEach(function(file){ 
+					if (/\.(jpg|jpeg|png|gif)$/i.test(file.name)) { %>
+						<img src="/src?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>">
+					<% }
+				}) %>
 			</div>
 			<div class="dirs">
 				<% dirs.forEach(function(file){ %>
