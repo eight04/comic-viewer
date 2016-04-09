@@ -1,6 +1,6 @@
 {
   "name": "comic-viewer",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Runs a comic viewer website",
   "main": "./lib/comic-viewer.js",
   "keywords": [
@@ -12,10 +12,10 @@
     "stop": "node bin/cli.js --stop",
     "test": "eslint */*.js",
     "sync-version": "node tools/sync-version.js bower.json bin/cli.js",
-	"preversion": "npm test",
+    "preversion": "npm test",
     "version": "npm run sync-version && git add .",
-	"postversion": "git push --follow-tags",
-	"postinstall": "bower install"
+    "postversion": "git push --follow-tags",
+    "postinstall": "bower install"
   },
   "repository": {
     "type": "git",
