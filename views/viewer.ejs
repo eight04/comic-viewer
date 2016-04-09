@@ -96,6 +96,9 @@
 		.bookmark-menu a {
 			display: block;
 		}
+		.dir-search-box {
+			width: 100%;
+		}
 		.show {
 			display: block;
 		}
@@ -145,7 +148,9 @@
 			if (typeof node == "string") {
 				node = document.querySelector(node);
 			}
-			node.addEventListener(event, callback);
+			if (node) {
+				node.addEventListener(event, callback);
+			}
 		}
 		
 		bind.one = function(node, event, callback) {
@@ -458,6 +463,44 @@
 				};
 			}();
 			
+			var dirSearch = function(){
+				var box = document.querySelector(".dir-search-box"),
+					cache = "";
+					
+				if (!box) {
+					return;
+				}
+			
+				function filter(value) {
+					if (cache == value) {
+						return;
+					}
+					if (cache + "\u3000" == value) {
+						// typing
+						return;
+					}
+					cache = value;
+				
+					var dirs = document.querySelectorAll(".dirs a"),
+						i;
+						
+					for (i = 0; i < dirs.length; i++) {
+						dirs[i].style.display = !value || dirs[i].textContent.indexOf(value) >= 0 ? "" : "none";
+					}
+				}
+				
+				function handleInput(e) {
+					filter(e.target.value);
+				}
+			
+				bind(box, "input", handleInput);
+				
+				if (box.value) {
+					filter(box.value);
+				}
+				
+			}();
+			
 			Mousetrap.bind("[", go(cv.prev && cv.prev.full));
 			Mousetrap.bind("]", go(cv.next && cv.next.full));
 			Mousetrap.bind("q", go(cv.curr.dir, cv.curr.name));
@@ -490,6 +533,11 @@
 					<% }
 				}) %>
 			</div>
+			<% if (dirs.length) { %>
+				<div class="dir-controls">
+					<input type="text" class="dir-search-box">
+				</div>
+			<% } %>
 			<div class="dirs">
 				<% dirs.forEach(function(file){ %>
 					<a href="/view?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>"><%= file.name %></a>
