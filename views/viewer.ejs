@@ -110,7 +110,8 @@
 			display: none;
 		}
 	</style>
-	<script src="/jquery/jquery.js"></script>
+	<script src="/mousetrap-js/mousetrap.js"></script>
+	<script src="/fetchival/index.js"></script>
 	<script>
 		var cv = <%- comicViewer %>,
 			match;
@@ -120,232 +121,356 @@
 			location.href = "/view?path=" + encodeURIComponent(cv.curr.dir) + "#" + cv.curr.name;
 		}
 		
-		var bookmark = function(){
-			var MAX_LENGTH = 10,
-				scrTop;
-			
-			function read() {
-				var bookmarks;
-				try {
-					bookmarks = JSON.parse(localStorage.bookmarks);
-					if (!(bookmarks instanceof Array)) {
-						bookmarks = [];
-					}
-				} catch (err) {
-					bookmarks = [];
-				}
-				return bookmarks;
-			}
-			
-			function save(bookmarks) {
-				while (bookmarks.length > MAX_LENGTH) {
-					bookmarks.shift();
-				}				
-				localStorage.bookmarks = JSON.stringify(bookmarks);
-			}
+		function escape(unsafe) {
+			return unsafe
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;");
+		}
 		
-			function add() {
-				var bookmarks = read(),
-					bookmark = {
-						path: cv.curr.full,
-						scrTop: $(window).scrollTop(),
-						name: cv.curr.name
-					};
-				
-				bookmarks.push(bookmark);
-				addMenuItem(bookmark);
-				
-				save(bookmarks);
-				
-				panel.notify("Saved bookmark: " + cv.curr.full);
+		function prepend(node, child) {
+			if (typeof node == "string") {
+				node = document.querySelector(node);
 			}
-			
-			function load() {
-				var bookmarks = read(),
-					last = bookmarks[bookmarks.length - 1];
-					
-				if (!last) {
-					panel.notify("Bookmark is empty");
-				} else if (last.path == cv.curr.full) {
-					scrTop = last.scrTop;
-					open();
-				} else {
-					location.href = "/view?path=" + encodeURIComponent(last.path) + "#SCRTOP" + last.scrTop;
-				}
-			}
-			
-			function open() {
-				$(window).scrollTop(scrTop);
-				if ($(window).scrollTop() != scrTop) {
-					setTimeout(open, 200);
-				} else {
-					panel.notify("Bookmark opened: " + cv.curr.full);
-					history.pushState("", document.title, window.location.pathname + window.location.search);
-				}
-			}
-			
-			function createMenu() {
-				var bookmarks = read(),
-					i;
-					
-				for (i = 0; i < bookmarks.length; i++) {
-					addMenuItem(bookmarks[i]);
-				}
-			}
-			
-			function addMenuItem(bookmark) {
-				$("<a/>", {
-					href: "/view?path=" + encodeURIComponent(bookmark.path) + "#SCRTOP" + bookmark.scrTop,
-					text: bookmark.name
-				}).prependTo(".bookmark-menu");
-			}
-			
-			function hashOpen() {
-				var match;
-				if (match = location.hash.match(/^#SCRTOP(\d+)/)) {
-					scrTop = match[1];
-					open();
-				}			
-			}
-			
-			function init() {
-				hashOpen();
-				createMenu();
-				
-				$(".command-bookmarks").click(showMenu);
-				$(window).on("hashchange", hashOpen);
-			}
-			
-			function showMenu() {
-				$(".nav").addClass("show");
-				$(".command-bookmarks").addClass("active");
-				$(".bookmark-menu").addClass("show");
-				setTimeout(bindHideMenu);
-			}
-			
-			function bindHideMenu() {
-				$(window).one("click", hideMenu);
-			}
-			
-			function hideMenu() {
-				$(".nav").removeClass("show");
-				$(".command-bookmarks").removeClass("active");
-				$(".bookmark-menu").removeClass("show");
-			}
-			
-			$(init);
-		
-			return {
-				load: load,
-				add: add
-			};
-		}();
-		
-		function handleKeydown(e) {
-			if (e.which == 221) {
-				// go next folder "["
-				location.href = "/view?path=" + encodeURIComponent(cv.next.full);
-			} else if (e.which == 219) {
-				// go prev folder "]"
-				location.href = "/view?path=" + encodeURIComponent(cv.prev.full);
-			} else if (e.which == 81) {
-				// go parent dir "Q"
-				location.href = "/view?path=" + encodeURIComponent(cv.curr.dir) + "#" + cv.curr.name;
-			} else if (e.which == 66) {
-				// bookmark "B"
-				if (e.shiftKey) {
-					bookmark.load();
-				} else {
-					bookmark.add();
-				}
-			} else if (e.which == 13) {
-				if (e.ctrlKey) {
-					explorer.open();
-				}
+			if (typeof child == "string") {
+				node.insertAdjacentHTML("afterbegin", child);
+			} else {
+				node.insertBefore(child, node.childeNodes[0]);
 			}
 		}
 		
-		var panel = function(){
-			var timer, x, y, hideStyle = $("#hide-cursor-style");
-			
-			function show(e) {
-				var w = $(window).width(),
-					scrTop = $(window).scrollTop();
-				$("body").addClass("show-cursor");
-				hideStyle.remove();
-				$(".container-inner, .nav").css("margin-right", $(window).width() - w + "px");
-				$(window).scrollTop(scrTop);
-				timer = setTimeout(hide, 1000);
+		function bind(node, event, callback) {
+			if (typeof node == "string") {
+				node = document.querySelector(node);
 			}
-			
-			function hide() {
-				hideStyle.appendTo("head");
-				$("body").removeClass("show-cursor");
-				$(".container-inner, .nav").css("margin-right", "");
-				timer = null;
+			node.addEventListener(event, callback);
+		}
+		
+		bind.one = function(node, event, callback) {
+			if (typeof node == "string") {
+				node = document.querySelector(node);
 			}
-			
-			function handleMove(e) {
-				// sometimes e.screenX and e.screenY will be 0
-				if (!e.screenX && !e.screenY) {
-					return
+			node.addEventListener(event, function self(e) {
+				node.removeEventListener(event, self);
+				callback.call(this, e);
+			});
+		}
+		
+		bind(document, "DOMContentLoaded", init);
+		
+		function init() {
+			var bookmark = function(){
+				var MAX_LENGTH = 10,
+					scrTop,
+					nav, cmd, menu;
+				
+				function read() {
+					var bookmarks;
+					try {
+						bookmarks = JSON.parse(localStorage.bookmarks);
+						if (!(bookmarks instanceof Array)) {
+							bookmarks = [];
+						}
+					} catch (err) {
+						bookmarks = [];
+					}
+					return bookmarks;
 				}
-				if (x == null && y == null) {
+				
+				function save(bookmarks) {
+					while (bookmarks.length > MAX_LENGTH) {
+						bookmarks.shift();
+					}				
+					localStorage.bookmarks = JSON.stringify(bookmarks);
+				}
+			
+				function add() {
+					var bookmarks = read(),
+						bookmark = {
+							path: cv.curr.full,
+							scrTop: window.scrollY,
+							name: cv.curr.name
+						};
+					
+					bookmarks.push(bookmark);
+					addMenuItem(bookmark);
+					
+					save(bookmarks);
+					
+					panel.notify("Saved bookmark: " + cv.curr.full);
+				}
+				
+				function load() {
+					var bookmarks = read(),
+						last = bookmarks[bookmarks.length - 1];
+						
+					if (!last) {
+						panel.notify("Bookmark is empty");
+					} else if (last.path == cv.curr.full) {
+						scrTop = last.scrTop;
+						open();
+					} else {
+						location.href = "/view?path=" + encodeURIComponent(last.path) + "#SCRTOP" + last.scrTop;
+					}
+				}
+				
+				function open() {
+					window.scrollTo(window.scrollX, scrTop);
+					if (window.scrollY != scrTop) {
+						setTimeout(open, 200);
+					} else {
+						panel.notify("Bookmark opened: " + cv.curr.full);
+						history.pushState("", document.title, window.location.pathname + window.location.search);
+					}
+				}
+				
+				function createMenu() {
+					var bookmarks = read(),
+						i;
+						
+					for (i = 0; i < bookmarks.length; i++) {
+						addMenuItem(bookmarks[i]);
+					}
+				}
+				
+				function addMenuItem(bookmark) {
+					var a = document.createElement("a");
+					a.href = "/view?path=" + encodeURIComponent(bookmark.path) + "#SCRTOP" + bookmark.scrTop;
+					a.textContent = bookmark.name;
+					prepend(menu, a);
+				}
+				
+				function hashOpen() {
+					var match;
+					if (match = location.hash.match(/^#SCRTOP(\d+)/)) {
+						scrTop = match[1];
+						open();
+					}			
+				}
+				
+				function showMenu() {
+					nav.classList.add("show");
+					cmd.classList.add("active");
+					menu.classList.add("show");
+					setTimeout(bindHideMenu);
+				}
+				
+				function bindHideMenu() {
+					bind.one(window, "click", hideMenu);
+				}
+				
+				function hideMenu() {
+					nav.classList.remove("show");
+					cmd.removeClass("active");
+					menu.removeClass("show");
+				}
+				
+				cmd = document.querySelector(".command-bookmarks");
+				nav = document.querySelector(".nav");
+				menu = document.querySelector(".bookmark-menu");
+				
+				hashOpen();
+				createMenu();
+				
+				bind(cmd, "click", showMenu);
+				bind(window, "hashchange", hashOpen);
+				
+				return {
+					load: load,
+					add: add
+				};
+			}();
+			
+			function go(path, name) {
+				path = encodeURIComponent(path);
+				name = name ? "#" + name : "";
+				return function () {
+					location.href = "/view?path=" + path + name;
+				};
+			}
+			
+			var scroller = function(){
+			
+				function nextJump(e) {
+					var img = images.current();
+					if (img) {
+						window.scrollBy(img.height);
+					}
+				}
+				
+				function prevJump() {
+					var img = images.current();
+					if (img && img.prev) {
+						window.scrollBy(-img.prev.height);
+					}
+				}
+			
+				return {
+					nextJump: nextJump,
+					prevJump: prevJump
+				};
+			}();
+			
+			var images = function(){
+			
+				function current() {
+					var scrTop = window.scrollY,
+						top = document.querySelector(".images").getBoundingClientRect().top + scrTop,
+						select = [],
+						prev = {
+							top: null,
+							height: null,
+							next: null,
+							prev: null
+						},
+						images = document.querySelectorAll(".images img"),
+						i, ch;
+						
+					for (i = 0; i < images.length; i++) {
+						ch = images[i].clientHeight;
+						if (top + ch <= scrTop) {
+							prev.top = top;
+							prev.height = ch;
+							top += ch;
+							continue;
+						}
+						if (select.length >= 2) {
+							break;
+						}
+						select.push({
+							top: top,
+							height: ch,
+							next: null,
+							prev: null
+						});
+						top += ch;
+					}
+					
+					if (prev.top !== null && select[0]) {
+						prev.next = select[0];
+						select[0].prev = prev;
+					}
+					
+					if (select[1]) {
+						select[0].next = select[1];
+						select[1].prev = select[0];
+					}
+					
+					if (select.length <= 1) {
+						return select[0];
+					}
+					if (select[1].top - scrTop > (scrTop + window.innerHeight) - select[1].top) {
+						return select[0];
+					}
+					return select[1];
+				}
+				
+				return {
+					current: current
+				};
+			}();
+			
+			var panel = function(){
+				var timer, x, y,
+					hideStyle = document.querySelector("#hide-cursor-style"),
+					nav = document.querySelector(".nav"),
+					inner = document.querySelector(".container-inner"),
+					notifyEl = document.querySelector(".notify");
+				
+				function show(e) {
+					var w = window.innerWidth,
+						scrTop = window.scrollY;
+						
+					document.body.classList.add("show-cursor");
+					document.head.removeChild(hideStyle);
+					
+					var scrW = window.innerWidth - w + "px";				
+					nav.style.marginRight = scrW;
+					inner.style.marginRight = scrW;
+					
+					window.scrollTo(window.scrollX, scrTop);
+					timer = setTimeout(hide, 1000);
+				}
+				
+				function hide() {
+					document.head.appendChild(hideStyle);
+					document.body.classList.remove("show-cursor");
+					
+					inner.style.marginRight = "";
+					nav.style.marginRight = "";
+					
+					timer = null;
+				}
+				
+				function handleMove(e) {
+					// sometimes e.screenX and e.screenY will be 0
+					if (!e.screenX && !e.screenY) {
+						return
+					}
+					if (x == null && y == null) {
+						x = e.screenX;
+						y = e.screenY;
+						return;
+					}
+					// chrome fires move event even not moving
+					if (e.screenX == x && e.screenY == y) {
+						return;
+					}
 					x = e.screenX;
 					y = e.screenY;
-					return;
+					if (timer) {
+						clearTimeout(timer);
+						timer = setTimeout(hide, 1000);
+						return;
+					}
+					show();
 				}
-				// chrome fires move event even not moving
-				if (e.screenX == x && e.screenY == y) {
-					return;
+				
+				var notifyTimer;
+				function notify(s) {
+					clearTimeout(notifyTimer);
+					notifyEl.textContent = s;
+					notifyEl.classList.add("show");
+					notifyTimer = setTimeout(denotify, 1000);
 				}
-				x = e.screenX;
-				y = e.screenY;
-				if (timer) {
-					clearTimeout(timer);
-					timer = setTimeout(hide, 1000);
-					return;
+				
+				function denotify() {
+					notifyEl.classList.remove("show");
 				}
-				show();
-			}
 			
-			var notifyTimer;
-			function notify(s) {
-				clearTimeout(notifyTimer);
-				$(".notify").text(s);
-				$(".notify").addClass("show");
-				notifyTimer = setTimeout(denotify, 1000);
-			}
+				bind(window, "mousemove", handleMove);
+				
+				return {
+					notify: notify
+				};
+			}();
 			
-			function denotify() {
-				$(".notify").removeClass("show");
-			}
-		
-			return {
-				handleMove: handleMove,
-				notify: notify
-			};
-		}();
-		
-		var explorer = function(){
-			function bind() {
-				$(".command-explorer").click(open);
-			}
+			var explorer = function(){
+				
+				function open() {
+					fetchival("/open").post({path: encodeURIComponent(cv.isFile ? cv.curr.dir : cv.curr.full)})
+					panel.notify("Launch directory");
+				}
+				
+				bind(".command-explorer", "click", open);
+				
+				return {
+					open: open
+				};
+			}();
 			
-			function open() {
-				$.post("/open", {path: encodeURIComponent(cv.isFile ? cv.curr.dir : cv.curr.full)});
-				panel.notify("Launch directory");
-			}
+			Mousetrap.bind("[", go(cv.prev && cv.prev.full));
+			Mousetrap.bind("]", go(cv.next && cv.next.full));
+			Mousetrap.bind("q", go(cv.curr.dir, cv.curr.name));
+			Mousetrap.bind("b", bookmark.add);
+			Mousetrap.bind("shift+b", bookmark.load);
+			Mousetrap.bind("ctrl+enter", explorer.open);
+			Mousetrap.bind("left", scroller.prevJump);
+			Mousetrap.bind("right", scroller.nextJump);
 			
-			$(bind);
-			
-			return {
-				open: open
-			};
-		}();
-		
-		$(document).keydown(handleKeydown);
-		$(document).mousemove(panel.handleMove);
+		}
 	</script>
 </head>
 <body>
