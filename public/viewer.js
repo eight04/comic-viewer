@@ -1,12 +1,3 @@
-function escape(unsafe) {
-	return unsafe
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#039;");
-}
-
 function prepend(node, child) {
 	if (typeof node == "string") {
 		node = document.querySelector(node);
@@ -35,7 +26,7 @@ bind.one = function(node, event, callback) {
 		node.removeEventListener(event, self);
 		callback.call(this, e);
 	});
-}
+};
 
 bind(document, "DOMContentLoaded", init);
 
@@ -123,7 +114,7 @@ function init() {
 		
 		function hashOpen() {
 			var match;
-			if (match = location.hash.match(/^#SCRTOP(\d+)/)) {
+			if ((match = location.hash.match(/^#SCRTOP(\d+)/))) {
 				scrTop = match[1];
 				open();
 			}			
@@ -255,7 +246,7 @@ function init() {
 			inner = document.querySelector(".container-inner"),
 			notifyEl = document.querySelector(".notify");
 		
-		function show(e) {
+		function show() {
 			var scrWidth,
 				scrTop = window.scrollY;
 				
@@ -283,7 +274,7 @@ function init() {
 		function handleMove(e) {
 			// sometimes e.screenX and e.screenY will be 0
 			if (!e.screenX && !e.screenY) {
-				return
+				return;
 			}
 			if (x == null && y == null) {
 				x = e.screenX;
@@ -326,7 +317,7 @@ function init() {
 	var explorer = function(){
 		
 		function open() {
-			fetchival("/open").post({path: encodeURIComponent(cv.isFile ? cv.curr.dir : cv.curr.full)})
+			fetchival("/open").post({path: encodeURIComponent(cv.isFile ? cv.curr.dir : cv.curr.full)});
 			panel.notify("Launch directory");
 		}
 		
@@ -337,7 +328,7 @@ function init() {
 		};
 	}();
 	
-	var dirSearch = function(){
+	(function dirSearch (){
 		var box = document.querySelector(".dir-search-box"),
 			cache = "";
 			
@@ -373,7 +364,7 @@ function init() {
 			filter(box.value);
 		}
 		
-	}();
+	})();
 	
 	Mousetrap.bind("[", go(cv.prev && cv.prev.full));
 	Mousetrap.bind("]", go(cv.next && cv.next.full));
