@@ -86,7 +86,7 @@ function init() {
 	launchFile();
 }
 
-if (args["<file>"]) {
+if (args["<file>"] && !path.isAbsolute(args["<file>"])) {
 	args["<file>"] = path.join(process.cwd(), args["<file>"]);
 }
 
