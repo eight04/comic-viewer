@@ -383,7 +383,7 @@ function init() {
 	Mousetrap.bind("ctrl+enter", explorer.open);
 	Mousetrap.bind("left", scroller.prevPage);
 	Mousetrap.bind("right", scroller.nextPage);
-	Mousetrap.bind(",", scroller.prevJump);
-	Mousetrap.bind(".", scroller.nextJump);
+	Mousetrap.bind("shift+left", scroller.prevJump);
+	Mousetrap.bind("shift+right", scroller.nextJump);
 	
 }
