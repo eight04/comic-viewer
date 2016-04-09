@@ -9,13 +9,8 @@ Dependencies
 
 Todos
 -----
-* In firefox with overflow hidden, the search next won't jump to correct position.
-* Smart page up/page down.
-* Smart left/right.
-* Filter.
-
-/view?path=PATH
-/src?path=PATH
+* In firefox with overflow hidden, the page won't scroll to correct position while searching.
+* Filter folders.
 
 Related apps
 ------------
