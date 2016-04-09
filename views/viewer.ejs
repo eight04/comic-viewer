@@ -137,7 +137,7 @@
 			if (typeof child == "string") {
 				node.insertAdjacentHTML("afterbegin", child);
 			} else {
-				node.insertBefore(child, node.childeNodes[0]);
+				node.insertBefore(child, node.childNodes[0]);
 			}
 		}
 		
@@ -292,24 +292,46 @@
 			}
 			
 			var scroller = function(){
-			
-				function nextJump(e) {
-					var img = images.current();
+				
+				function nextJump() {
+					var imgs = images.current(),
+						img = imgs[1] || imgs[0];
 					if (img) {
-						window.scrollBy(img.height);
+						window.scrollBy(0, img.height);
 					}
 				}
 				
 				function prevJump() {
-					var img = images.current();
-					if (img && img.prev) {
-						window.scrollBy(-img.prev.height);
+					var imgs = images.current(),
+						img = imgs[imgs.length - 2] || imgs[0];
+					if (img) {
+						window.scrollBy(0, -img.height);
+					}
+				}
+				
+				function nextPage() {
+					var imgs = images.current(),
+						img = imgs[1] && imgs[1].top == window.scrollY ? imgs[1] : imgs[0];
+						
+					if (img) {
+						window.scrollBy(0, img.top + img.height - window.scrollY);
+					}
+				}
+				
+				function prevPage() {
+					var imgs = images.current(),
+						img = imgs[0];
+						
+					if (img) {
+						window.scrollBy(0, img.top - window.scrollY);
 					}
 				}
 			
 				return {
 					nextJump: nextJump,
-					prevJump: prevJump
+					prevJump: prevJump,
+					nextPage: nextPage,
+					prevPage: prevPage
 				};
 			}();
 			
@@ -317,54 +339,29 @@
 			
 				function current() {
 					var scrTop = window.scrollY,
-						top = document.querySelector(".images").getBoundingClientRect().top + scrTop,
+						top = Math.round(document.querySelector(".images").getBoundingClientRect().top) + scrTop,
+						windowHeight = window.innerHeight,
 						select = [],
-						prev = {
-							top: null,
-							height: null,
-							next: null,
-							prev: null
-						},
 						images = document.querySelectorAll(".images img"),
 						i, ch;
 						
 					for (i = 0; i < images.length; i++) {
 						ch = images[i].clientHeight;
-						if (top + ch <= scrTop) {
-							prev.top = top;
-							prev.height = ch;
+						if (top + ch < scrTop) {
+							top += ch;
+							continue;
+						} else if (top <= scrTop + windowHeight) {
+							select.push({
+								top: top,
+								height: ch
+							});
 							top += ch;
 							continue;
 						}
-						if (select.length >= 2) {
-							break;
-						}
-						select.push({
-							top: top,
-							height: ch,
-							next: null,
-							prev: null
-						});
-						top += ch;
+						break;
 					}
 					
-					if (prev.top !== null && select[0]) {
-						prev.next = select[0];
-						select[0].prev = prev;
-					}
-					
-					if (select[1]) {
-						select[0].next = select[1];
-						select[1].prev = select[0];
-					}
-					
-					if (select.length <= 1) {
-						return select[0];
-					}
-					if (select[1].top - scrTop > (scrTop + window.innerHeight) - select[1].top) {
-						return select[0];
-					}
-					return select[1];
+					return select;
 				}
 				
 				return {
@@ -380,15 +377,15 @@
 					notifyEl = document.querySelector(".notify");
 				
 				function show(e) {
-					var w = window.innerWidth,
+					var scrWidth,
 						scrTop = window.scrollY;
 						
 					document.body.classList.add("show-cursor");
 					document.head.removeChild(hideStyle);
 					
-					var scrW = window.innerWidth - w + "px";				
-					nav.style.marginRight = scrW;
-					inner.style.marginRight = scrW;
+					scrWidth = document.documentElement.clientWidth - window.innerWidth + "px";
+					nav.style.marginRight = scrWidth;
+					inner.style.marginRight = scrWidth;
 					
 					window.scrollTo(window.scrollX, scrTop);
 					timer = setTimeout(hide, 1000);
@@ -467,8 +464,10 @@
 			Mousetrap.bind("b", bookmark.add);
 			Mousetrap.bind("shift+b", bookmark.load);
 			Mousetrap.bind("ctrl+enter", explorer.open);
-			Mousetrap.bind("left", scroller.prevJump);
-			Mousetrap.bind("right", scroller.nextJump);
+			Mousetrap.bind("left", scroller.prevPage);
+			Mousetrap.bind("right", scroller.nextPage);
+			Mousetrap.bind(",", scroller.prevJump);
+			Mousetrap.bind(".", scroller.nextJump);
 			
 		}
 	</script>
