@@ -32,9 +32,10 @@ bind(document, "DOMContentLoaded", init);
 
 function init() {
 	var bookmark = function(){
-		var MAX_LENGTH = 10,
-			scrTop,
-			nav, cmd, menu;
+		var nav = document.querySelector(".nav"),
+			cmd = document.querySelector(".command-bookmarks"),
+			menu = document.querySelector(".bookmark-menu"),
+			MAX_LENGTH = 10;
 		
 		function read() {
 			var bookmarks;
@@ -58,11 +59,11 @@ function init() {
 	
 		function add() {
 			var bookmarks = read(),
-				bookmark = {
-					path: cv.curr.full,
-					scrTop: window.scrollY,
-					name: cv.curr.name
-				};
+				bookmark = create();
+				
+			if (!bookmark) {
+				return;
+			}
 			
 			bookmarks.push(bookmark);
 			addMenuItem(bookmark);
@@ -78,23 +79,10 @@ function init() {
 				
 			if (!last) {
 				panel.notify("Bookmark is empty");
-			} else if (last.path == cv.curr.full) {
-				scrTop = last.scrTop;
-				open();
-			} else {
-				location.href = "/view?path=" + encodeURIComponent(last.path) + "#SCRTOP" + last.scrTop;
+				return;
 			}
-		}
-		
-		function open() {
-			window.scrollTo(window.scrollX, scrTop);
-			if (window.scrollY != scrTop) {
-				setTimeout(open, 200);
-			} else {
-				panel.notify("Bookmark opened: " + cv.curr.full);
-				history.pushState("", document.title, window.location.pathname + window.location.search);
-			}
-		}
+			go(last);
+		}		
 		
 		function createMenu() {
 			var bookmarks = read(),
@@ -107,17 +95,28 @@ function init() {
 		
 		function addMenuItem(bookmark) {
 			var a = document.createElement("a");
-			a.href = "/view?path=" + encodeURIComponent(bookmark.path) + "#SCRTOP" + bookmark.scrTop;
+			a.href = "/view?path=" + encodeURIComponent(bookmark.path) + "#" + encodeURIComponent(bookmark.name) + "#offset=" + bookmark.offset;
 			a.textContent = bookmark.name;
 			prepend(menu, a);
 		}
 		
 		function hashOpen() {
-			var match;
-			if ((match = location.hash.match(/^#SCRTOP(\d+)/))) {
-				scrTop = match[1];
-				open();
-			}			
+			var tokens = location.hash.split("#"),
+				bookmark = {},
+				i, parts;
+			for (i = 0; i < tokens.length; i++) {
+				if (!tokens[i]) {
+					continue;
+				}
+				if (tokens[i].indexOf("=") < 0) {
+					bookmark.name = decodeURIComponent(tokens[i]);
+				} else {
+					parts = tokens[i].split("#").map(decodeURIComponent);
+					bookmark[parts[0]] = parts[1];
+				}
+			}
+			history.pushState("", document.title, window.location.pathname + window.location.search);
+			go(bookmark);
 		}
 		
 		function showMenu() {
@@ -137,19 +136,51 @@ function init() {
 			menu.classList.remove("show");
 		}
 		
-		cmd = document.querySelector(".command-bookmarks");
-		nav = document.querySelector(".nav");
-		menu = document.querySelector(".bookmark-menu");
+		function create() {
+			var imgs = images.current(),
+				img = imgs[1] && imgs[1].top == window.scrollY ? imgs[1] : imgs[0];
+				
+			if (img) {
+				return {
+					path: cv.curr.full,
+					name: img.name,
+					offset: window.scrollY - img.top
+				};
+			}
+		}
 		
-		hashOpen();
+		function go(bookmark) {
+			if (!bookmark || bookmark.offset == null) {
+				return;
+			}
+			if (bookmark.path && bookmark.path != cv.curr.path) {
+				location.href = "/views?path=" + encodeURIComponent(bookmark.path) + "#" + bookmark.name + "#offset=" + bookmark.offset;
+				return;
+			}
+			var offset = bookmark.offset;
+			if (bookmark.name) {
+				offset += images.get(bookmark.name).top;
+			}
+			window.scrollTo(window.scrollX, offset);
+			panel.notify("Bookmark opened: " + cv.curr.full);
+		}
+		
 		createMenu();
+		
+		if (document.readyState == "complete") {
+			hashOpen();
+		} else {
+			bind.once(window, "load", hashOpen);
+		}
 		
 		bind(cmd, "click", showMenu);
 		bind(window, "hashchange", hashOpen);
 		
 		return {
 			load: load,
-			add: add
+			add: add,
+			create: create,
+			go: go
 		};
 	}();
 	
@@ -208,8 +239,10 @@ function init() {
 	}();
 	
 	var images = function(){
-		var cont = document.querySelector(".images");
-	
+		var cont = document.querySelector(".images"),
+			maxWidthStyle = document.createElement("style"),
+			orig = false, resize = 100;
+			
 		function current() {
 			var scrTop = window.scrollY,
 				top = Math.round(cont.getBoundingClientRect().top) + scrTop,
@@ -226,7 +259,8 @@ function init() {
 				} else if (top <= scrTop + windowHeight) {
 					select.push({
 						top: top,
-						height: ch
+						height: ch,
+						name: images[i].id
 					});
 					top += ch;
 					continue;
@@ -244,10 +278,66 @@ function init() {
 			e.target.classList.toggle("original-size");
 		}
 		
+		function resetWidth() {
+			orig = false;
+			resize = 100;
+			if (maxWidthStyle.parentNode) {
+				var bm = bookmark.create();
+				maxWidthStyle.parentNode.removeChild(maxWidthStyle);
+				bookmark.go(bm);
+			}
+		}
+		
+		function origWidth() {
+			orig = true;
+			resize = 100;
+			var bm = bookmark.create();
+			maxWidthStyle.textContent = ".images img {max-width: none}";
+			document.head.appendChild(maxWidthStyle);
+			bookmark.go(bm);
+		}
+		
+		function increaseWidth() {
+			resize += 10;
+			applyResize();
+		}
+		
+		function decreaseWidth() {
+			resize = resize - 10 <= 0 ? 10 : resize - 10;
+			applyResize();
+		}
+		
+		function applyResize() {
+			var bm = bookmark.create();
+			if (orig) {
+				maxWidthStyle.textContent = ".images img {max-width: none; width: " + resize + "%}";
+			} else {
+				maxWidthStyle.textContent = ".images img {max-width: " + resize + "vw}";
+			}
+			document.head.appendChild(maxWidthStyle);
+			bookmark.go(bm);
+		}
+		
+		function get(name) {
+			var img = cont.querySelector("#" + name);
+			if (img) {
+				return {
+					name: name,
+					top: Math.round(img.getBoundingClientRect().top),
+					height: img.clientHeight
+				};
+			}
+		}
+		
 		bind(cont, "click", handleClick);
 		
 		return {
-			current: current
+			current: current,
+			resetWidth: resetWidth,
+			origWidth: origWidth,
+			increaseWidth: increaseWidth,
+			decreaseWidth: decreaseWidth,
+			get: get
 		};
 	}();
 	
@@ -388,5 +478,8 @@ function init() {
 	// Mousetrap.bind("right", scroller.nextPage);
 	Mousetrap.bind("shift+pageup", scroller.prevJump);
 	Mousetrap.bind("shift+pagedown", scroller.nextJump);
-	
+	Mousetrap.bind("0", images.origWidth);
+	Mousetrap.bind("8", images.resetWidth);
+	Mousetrap.bind("-", images.decreaseWidth);
+	Mousetrap.bind("=", images.increaseWidth);
 }
