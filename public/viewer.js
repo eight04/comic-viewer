@@ -208,13 +208,14 @@ function init() {
 	}();
 	
 	var images = function(){
+		var cont = document.querySelector(".images");
 	
 		function current() {
 			var scrTop = window.scrollY,
-				top = Math.round(document.querySelector(".images").getBoundingClientRect().top) + scrTop,
+				top = Math.round(cont.getBoundingClientRect().top) + scrTop,
 				windowHeight = window.innerHeight,
 				select = [],
-				images = document.querySelectorAll(".images img"),
+				images = cont.querySelectorAll("img"),
 				i, ch;
 				
 			for (i = 0; i < images.length; i++) {
@@ -235,6 +236,15 @@ function init() {
 			
 			return select;
 		}
+		
+		function handleClick(e) {
+			if (!(e.target instanceof HTMLImageElement)) {
+				return;
+			}
+			e.target.classList.toggle("original-size");
+		}
+		
+		bind(cont, "click", handleClick);
 		
 		return {
 			current: current
@@ -374,9 +384,9 @@ function init() {
 	Mousetrap.bind("b", bookmark.add);
 	Mousetrap.bind("shift+b", bookmark.load);
 	Mousetrap.bind("ctrl+enter", explorer.open);
-	Mousetrap.bind("left", scroller.prevPage);
-	Mousetrap.bind("right", scroller.nextPage);
-	Mousetrap.bind("shift+left", scroller.prevJump);
-	Mousetrap.bind("shift+right", scroller.nextJump);
+	// Mousetrap.bind("left", scroller.prevPage);
+	// Mousetrap.bind("right", scroller.nextPage);
+	Mousetrap.bind("shift+pageup", scroller.prevJump);
+	Mousetrap.bind("shift+pagedown", scroller.nextJump);
 	
 }
