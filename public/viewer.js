@@ -163,7 +163,8 @@ function init() {
 	
 	var scroller = function(){
 		
-		function nextJump() {
+		function nextJump(e) {
+			e.preventDefault();
 			var imgs = images.current(),
 				img = imgs[1] || imgs[0];
 			if (img) {
@@ -171,7 +172,8 @@ function init() {
 			}
 		}
 		
-		function prevJump() {
+		function prevJump(e) {
+			e.preventDefault();
 			var imgs = images.current(),
 				img = imgs[imgs.length - 2] || imgs[0];
 			if (img) {
