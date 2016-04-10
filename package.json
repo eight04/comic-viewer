@@ -14,7 +14,7 @@
     "sync-version": "node tools/sync-version.js bower.json bin/cli.js",
     "preversion": "npm test",
     "version": "npm run sync-version && git add .",
-    "postversion": "git push --follow-tags",
+    "postversion": "git push --follow-tags && npm publish",
     "postinstall": "bower install"
   },
   "repository": {
