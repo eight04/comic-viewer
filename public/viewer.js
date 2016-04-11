@@ -285,7 +285,7 @@ function init() {
 			orig = false;
 			resize = 100;
 			if (maxWidthStyle.parentNode) {
-				var st = scrollStamp;
+				var st = scrollStamp();
 				maxWidthStyle.parentNode.removeChild(maxWidthStyle);
 				imageResize();
 				st();
@@ -344,12 +344,13 @@ function init() {
 		
 		function scrollStamp() {
 			var bm = bookmark.create(),
-				scrollable = document.documentElement.scrollWidth - window.innerWidth,
+				scrollable = document.documentElement.scrollWidth - document.documentElement.clientWidth,
 				scrollX = window.scrollX;
+				
 			return function() {
 				bookmark.go(bm);
 				
-				var scrollable2 = document.documentElement.scrollWidth - window.innerWidth,
+				var scrollable2 = document.documentElement.scrollWidth - document.documentElement.clientWidth,
 					scrollX2;
 					
 				if (scrollable) {
