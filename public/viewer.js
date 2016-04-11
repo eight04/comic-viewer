@@ -343,13 +343,23 @@ function init() {
 		}
 		
 		function scrollStamp() {
-			var bm = bookmark.create(),
-				scrollable = document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			var scrollable = document.documentElement.scrollWidth - document.documentElement.clientWidth,
 				scrollX = window.scrollX;
 				
-			return function() {
-				bookmark.go(bm);
+			var windowHalfHeight = Math.round(window.innerHeight / 2),
+				scrollYMiddle = window.scrollY + windowHalfHeight,
+				imgs = current(),
+				img, percentY, i;
 				
+			for (i = 0; i < imgs.length; i++) {
+				if (imgs[i].top <= scrollYMiddle && imgs[i].top + imgs[i].height > scrollYMiddle) {
+					img = imgs[i];
+					percentY = (scrollYMiddle - img.top) / img.height;
+					break;
+				}
+			}
+				
+			return function() {
 				var scrollable2 = document.documentElement.scrollWidth - document.documentElement.clientWidth,
 					scrollX2;
 					
@@ -359,7 +369,10 @@ function init() {
 					scrollX2 = scrollable2 / 2;
 				}
 				
-				window.scrollTo(scrollX2, window.scrollY);
+				var img2 = get(img.name),
+					scrollY2 = percentY * img2.height + img2.top - windowHalfHeight;
+				
+				window.scrollTo(scrollX2, scrollY2);
 			};
 		}
 		
