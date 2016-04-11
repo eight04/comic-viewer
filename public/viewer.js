@@ -308,7 +308,10 @@ function init() {
 		}
 		
 		function decreaseWidth() {
-			resize = resize - 10 <= 0 ? 10 : resize - 10;
+			if (resize <= 10) {
+				return;
+			}
+			resize -= 10;
 			applyResize();
 		}
 		
