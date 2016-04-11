@@ -14,16 +14,18 @@ Usage
 Comic Viewer
 
 Usage:
-  comic-viewer [--port <port>] [--start | --stop] [<file>]
+  comic-viewer [--port <port>] (--start | --stop)
+  comic-viewer [--port <port>] [--start | --stop] [--run-with <browser>] <file>
   comic-viewer --help | --version
   
 Options:
-  --port <port>  Set the port of the server. [default: 8080]
-  --start        Start the server, if the server is not already running.
-  --stop         Stop the server.
-  <file>         The file to open in browser, if provided.
-  --help         Show help message.
-  --version      Show version number.
+  --port <port>         Set the port of the server. [default: 8080]
+  --start               Start the server, if the server is not already running.
+  --stop                Stop the server.
+  --run-with <browser>  Specify browser executable.
+  <file>                The file to open, if provided.
+  --help                Show help message.
+  --version             Show version number.`;
 ```
 
 For example:
@@ -31,6 +33,21 @@ For example:
 ```
 comic-viewer --start "C:\My Pictures\test.jpg"
 ```
+
+Hotkeys
+-------
+* `[` - previous directory.
+* `]` - next directory.
+* `q` - upper level directory.
+* `b` - bookmark this file.
+* `shift+b` - open latest bookmark.
+* `ctrl+enter` - open explorer.
+* `shift+pageup` - scroll up one page.
+* `shift+pagedown` - scroll down one page.
+* `0` - show original size.
+* `8` - match window width.
+* `=` - zoom in.
+* `-` - zoom out.
 
 Todos
 -----
@@ -44,6 +61,13 @@ Related apps
 
 Changelog
 ---------
+* 0.2.0 (Apr 11, 2016)
+	- Replace `opener` with `open`.
+	- Add `--run-with` option.
+	- Only read lock file if `--start/--stop` is set.
+	- Change some style.
+	- Fix bookmark bug.
+	- Add resize function.
 * 0.1.1 (Apr 9, 2016)
 	- Fix prev/next undefined bug.
 	- Use localhost hostname.
