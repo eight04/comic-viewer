@@ -11,7 +11,7 @@ Options:
   --start               Start the server, if the server is not already running.
   --stop                Stop the server.
   --run-with <browser>  Specify browser executable.
-  <file>                The file to open in browser, if provided.
+  <file>                The file to open, if provided.
   --help                Show help message.
   --version             Show version number.`;
 
