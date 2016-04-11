@@ -2,16 +2,18 @@
 var doc = `Comic Viewer
 
 Usage:
-  comic-viewer [--port <port>] [--start | --stop] [<file>]
+  comic-viewer [--port <port>] (--start | --stop)
+  comic-viewer [--port <port>] [--start | --stop] [--run-with <browser>] <file>
   comic-viewer --help | --version
   
 Options:
-  --port <port>  Set the port of the server. [default: 8080]
-  --start        Start the server, if the server is not already running.
-  --stop         Stop the server.
-  <file>         The file to open in browser, if provided.
-  --help         Show help message.
-  --version      Show version number.`;
+  --port <port>         Set the port of the server. [default: 8080]
+  --start               Start the server, if the server is not already running.
+  --stop                Stop the server.
+  --run-with <browser>  Specify browser executable.
+  <file>                The file to open in browser, if provided.
+  --help                Show help message.
+  --version             Show version number.`;
 
 var docopt = require("docopt"),
 	mkdirp = require("mkdirp"),
@@ -34,8 +36,12 @@ function launchFile() {
 	if (!args["<file>"]) {
 		return;
 	}
-	var opener = require("opener");
-	opener("http://localhost:" + args["--port"] + "/view?path=" + encodeURIComponent(args["<file>"]));
+	var command = "http://localhost:" + args["--port"] + "/view?path=" + encodeURIComponent(args["<file>"]);
+	
+	if (args["--run-with"]) {
+		command = args["--run-with"] + ' "' + command + '"';
+	}
+	require("opener")(command);
 }
 
 function createLock() {
