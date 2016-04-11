@@ -35,7 +35,7 @@
     "ejs": "^2.4.1",
     "express": "^4.13.4",
     "mkdirp": "^0.5.1",
-    "opener": "^1.4.1",
+    "open": "0.0.5",
     "path-extra": "^3.0.0"
   },
   "devDependencies": {

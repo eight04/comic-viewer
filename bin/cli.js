@@ -36,12 +36,9 @@ function launchFile() {
 	if (!args["<file>"]) {
 		return;
 	}
-	var command = "http://localhost:" + args["--port"] + "/view?path=" + encodeURIComponent(args["<file>"]);
+	var url = "http://localhost:" + args["--port"] + "/view?path=" + encodeURIComponent(args["<file>"]);
 	
-	if (args["--run-with"]) {
-		command = args["--run-with"] + ' "' + command + '"';
-	}
-	require("opener")(command);
+	require("open")(url, args["--run-with"]);
 }
 
 function createLock() {
