@@ -20,7 +20,7 @@ var docopt = require("docopt"),
 	process = require("process"),
 	fs = require("fs"),
 	
-	args = docopt.docopt(doc, {version: "0.1.1"}),
+	args = docopt.docopt(doc, {version: "0.2.0"}),
 	path = require("path-extra"),
 	appDir = path.datadir("comic-viewer"),
 	lock = path.join(appDir, "lock"),
