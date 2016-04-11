@@ -487,6 +487,10 @@ function init() {
 		if (!box) {
 			return;
 		}
+		
+		function escapeRE(str) {
+			return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+		}
 	
 		function filter(value) {
 			if (cache == value) {
@@ -499,10 +503,11 @@ function init() {
 			cache = value;
 		
 			var dirs = document.querySelectorAll(".dirs a"),
+				re = new RegExp(escapeRE(value), "i"),
 				i;
 				
 			for (i = 0; i < dirs.length; i++) {
-				dirs[i].style.display = !value || dirs[i].textContent.indexOf(value) >= 0 ? "" : "none";
+				dirs[i].style.display = !value || re.test(dirs[i].textContent) ? "" : "none";
 			}
 		}
 		
