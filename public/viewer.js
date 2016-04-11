@@ -111,7 +111,7 @@ function init() {
 				if (tokens[i].indexOf("=") < 0) {
 					bookmark.name = decodeURIComponent(tokens[i]);
 				} else {
-					parts = tokens[i].split("#").map(decodeURIComponent);
+					parts = tokens[i].split("=").map(decodeURIComponent);
 					bookmark[parts[0]] = parts[1];
 				}
 			}
@@ -158,7 +158,7 @@ function init() {
 				return;
 			}
 			if (bookmark.path && bookmark.path != cv.curr.full) {
-				location.href = "/views?path=" + encodeURIComponent(bookmark.path) + "#" + bookmark.name + "#offset=" + bookmark.offset;
+				location.href = "/view?path=" + encodeURIComponent(bookmark.path) + "#" + bookmark.name + "#offset=" + bookmark.offset;
 				return;
 			}
 			var offset = +bookmark.offset;
