@@ -72,7 +72,28 @@ function removeLock(callback) {
 	fs.unlink(lock, callback);
 }
 
-function init() {
+function readLock() {
+	process.chdir(path.join(__dirname, ".."));
+
+	fs.readFile(lock, function(err, pid) {
+		server.isLocked = !err;
+		server.pid = +pid;
+		
+		if (server.isLocked) {
+			try {
+				process.kill(+pid, 0);
+			} catch (err) {
+				// the process doesn't exist
+				server.isLocked = false;
+				removeLock(operateServer);
+				return;
+			}
+		}
+		operateServer();
+	});
+}
+
+function operateServer() {
 	if (args["--start"]) {
 		if (server.isLocked) {
 			console.log("Server is already running at pid:" + server.pid);
@@ -90,21 +111,8 @@ if (args["<file>"] && !path.isAbsolute(args["<file>"])) {
 	args["<file>"] = path.join(process.cwd(), args["<file>"]);
 }
 
-process.chdir(path.join(__dirname, ".."));
-
-fs.readFile(lock, function(err, pid) {
-	server.isLocked = !err;
-	server.pid = +pid;
-	
-	if (server.isLocked) {
-		try {
-			process.kill(+pid, 0);
-		} catch (err) {
-			// the process doesn't exist
-			server.isLocked = false;
-			removeLock(init);
-			return;
-		}
-	}
-	process.nextTick(init);
-});
+if (args["--start"] || args["--stop"]) {
+	readLock();
+} else {
+	launchFile();
+}
