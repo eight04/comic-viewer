@@ -45,7 +45,7 @@ a.active {
 .dirs a {
 	display: block;
 	padding: 0.3em 0.6em;
-	margin: 0.6em 0;
+	margin: 1px 1em;
 }
 .nav {
 	display: none;
@@ -96,8 +96,12 @@ a.active {
 .bookmark-menu a {
 	display: block;
 }
+.dir-controls {
+	margin: 1em;
+}
 .dir-search-box {
 	width: 100%;
+	box-sizing: border-box;
 }
 .show {
 	display: block;
