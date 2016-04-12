@@ -54,7 +54,9 @@
 				<% if (prev) { %>
 					<a href="/view?path=<%= encodeURIComponent(prev.full) %>" id="prev" title="<%= prev.name %>">Prev</a>
 				<% } %>
-				<a href="/view?path=<%= encodeURIComponent(curr.dir) + "#" + curr.name %>" title="<%= curr.dirname %>">..</a>
+				<% if (curr.dir) { %>
+					<a href="/view?path=<%= encodeURIComponent(curr.dir) + "#" + curr.name %>" title="<%= curr.dirname %>">..</a>
+				<% } %>
 				<% if (next) { %>
 					<a href="/view?path=<%= encodeURIComponent(next.full) %>" id="next" title="<%= next.name %>">Next</a>
 				<% } %>

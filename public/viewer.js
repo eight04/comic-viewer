@@ -120,7 +120,9 @@ function init() {
 			}
 			history.pushState("", document.title, window.location.pathname + window.location.search);
 			go(bookmark);
-			panel.notify("Bookmark opened: " + cv.curr.full);
+			if (bookmark.offset) {
+				panel.notify("Bookmark opened: " + cv.curr.full);
+			}
 		}
 		
 		function showMenu() {
@@ -523,14 +525,18 @@ function init() {
 		
 	})();
 	
-	Mousetrap.bind("[", go(cv.prev && cv.prev.full));
-	Mousetrap.bind("]", go(cv.next && cv.next.full));
-	Mousetrap.bind("q", go(cv.curr.dir, cv.curr.name));
+	if (cv.prev) {
+		Mousetrap.bind("[", go(cv.prev.full));
+	}
+	if (cv.next) {
+		Mousetrap.bind("]", go(cv.next.full));
+	}
+	if (cv.curr.dir) {
+		Mousetrap.bind("q", go(cv.curr.dir, cv.curr.name));
+	}
 	Mousetrap.bind("b", bookmark.add);
 	Mousetrap.bind("shift+b", bookmark.load);
 	Mousetrap.bind("ctrl+enter", explorer.open);
-	// Mousetrap.bind("left", scroller.prevPage);
-	// Mousetrap.bind("right", scroller.nextPage);
 	Mousetrap.bind("shift+pageup", scroller.prevJump);
 	Mousetrap.bind("shift+pagedown", scroller.nextJump);
 	Mousetrap.bind("0", images.origWidth);
