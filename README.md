@@ -61,6 +61,8 @@ Related apps
 
 Changelog
 ---------
+* 0.3.0 (Apr 12, 2016)
+	- Drop bower depency, use github tarball.
 * 0.2.0 (Apr 11, 2016)
 	- Replace `opener` with `open`.
 	- Add `--run-with` option.
