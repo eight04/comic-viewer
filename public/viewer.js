@@ -115,12 +115,9 @@ function init() {
 					bookmark[parts[0]] = parts[1];
 				}
 			}
-			if (!bookmark.name && !bookmark.offset) {
-				return;
-			}
-			history.pushState("", document.title, window.location.pathname + window.location.search);
-			go(bookmark);
 			if (bookmark.offset) {
+				history.pushState("", document.title, window.location.pathname + window.location.search);
+				go(bookmark);
 				panel.notify("Bookmark opened: " + cv.curr.full);
 			}
 		}
