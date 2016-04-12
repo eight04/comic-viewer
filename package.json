@@ -14,8 +14,7 @@
     "sync-version": "node tools/sync-version.js bin/cli.js",
     "preversion": "npm test",
     "version": "npm run sync-version && git add .",
-    "postversion": "git push --follow-tags && npm publish",
-    "postinstall": "bower install"
+    "postversion": "git push --follow-tags && npm publish"
   },
   "repository": {
     "type": "git",
