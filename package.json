@@ -1,6 +1,6 @@
 {
   "name": "comic-viewer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Runs a comic viewer website",
   "main": "./lib/comic-viewer.js",
   "keywords": [
