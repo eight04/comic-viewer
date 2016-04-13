@@ -1,6 +1,6 @@
 Comic Viewer
 ============
-Runs a comic viewer website locally.
+Run a comic viewer website locally.
 
 Install
 -------
@@ -25,7 +25,7 @@ Options:
   --run-with <browser>  Specify browser executable.
   <file>                The file to open, if provided.
   --help                Show help message.
-  --version             Show version number.`;
+  --version             Show version number.
 ```
 
 For example:
