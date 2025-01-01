@@ -405,8 +405,8 @@ function init() {
 			document.head.removeChild(hideStyle);
 			
 			scrWidth = document.documentElement.clientWidth - window.innerWidth + "px";
-			nav.style.marginRight = scrWidth;
-			inner.style.marginRight = scrWidth;
+			// nav.style.marginRight = scrWidth;
+			// inner.style.marginRight = scrWidth;
 			
 			window.scrollTo(window.scrollX, scrTop);
 			timer = setTimeout(hide, 1000);
@@ -416,8 +416,8 @@ function init() {
 			document.head.appendChild(hideStyle);
 			document.body.classList.remove("show-cursor");
 			
-			inner.style.marginRight = "";
-			nav.style.marginRight = "";
+			// inner.style.marginRight = "";
+			// nav.style.marginRight = "";
 			
 			timer = null;
 		}

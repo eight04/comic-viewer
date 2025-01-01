@@ -49,7 +49,7 @@ function createLock() {
 			exit();
 			return;
 		}
-		fs.writeFile(lock, process.pid, function(err) {
+		fs.writeFile(lock, String(process.pid), function(err) {
 			if (err) {
 				console.err(err);
 				exit();

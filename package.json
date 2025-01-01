@@ -35,6 +35,7 @@
     "fetchival": "https://github.com/typicode/fetchival/archive/v0.3.2.tar.gz",
     "mkdirp": "^0.5.1",
     "mousetrap": "https://github.com/mousetrap-js/mousetrap/archive/1.5.5.tar.gz",
+    "natsort": "^2.0.3",
     "open": "0.0.5",
     "path-extra": "^3.0.0"
   },
