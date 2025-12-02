@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-  <title>${d.curr.name}</title>
+  <title>${escapeHtml(d.curr.name)}</title>
 	<link rel="stylesheet" href="/viewer.css">
 	<style id="hide-cursor-style">
 		::-webkit-scrollbar {
@@ -26,7 +26,7 @@
 	<div class="container">
 		<div class="container-inner">
 			<div class="nav">
-        <a class="title main">${d.curr.name}</a>
+        <a class="title main">${escapeHtml(d.curr.name)}</a>
 				<div class="right">
 					<a class="command-explorer">Explorer</a>
 					<a class="command-bookmarks">Bookmarks</a>
@@ -36,7 +36,7 @@
 			<div class="images">
         ${d.files.map(file => {
           if (/\.(jpg|jpeg|png|gif)$/i.test(file.name)) {
-            return `<img src="/src?path=${encodeURIComponent(file.full)}" id="${file.name}">`;
+            return `<img src="/src?path=${encodeURIComponent(file.full)}" id="${escapeHtml(file.name)}">`;
           } else {
             return '';
           }
@@ -47,13 +47,13 @@
       </div>` : ''}
 			<div class="dirs">
         ${d.dirs.map(file =>
-          `<a href="/view?path=${encodeURIComponent(file.full)}" id="${file.name}">${file.name}</a>`
+          `<a href="/view?path=${encodeURIComponent(file.full)}" id="${escapeHtml(file.name)}">${escapeHtml(file.name)}</a>`
           ).join('')}
 			</div>
 			<div class="controls">
-        ${d.prev ?  `<a href="/view?path=${encodeURIComponent(d.prev.full)}" id="prev" title="${d.prev.name}">Prev</a>` : '' }
-        ${d.curr.dir ? `<a href="/view?path=${encodeURIComponent(d.curr.dir)}#${d.curr.name}" title="${d.curr.dirname}">..</a>` : '' }
-        ${d.next ? `<a href="/view?path=${encodeURIComponent(d.next.full)}" id="next" title="${d.next.name}">Next</a>` : '' }
+        ${d.prev ?  `<a href="/view?path=${encodeURIComponent(d.prev.full)}" id="prev" title="${escapeHtml(d.prev.name)}">Prev</a>` : '' }
+        ${d.curr.dir ? `<a href="/view?path=${encodeURIComponent(d.curr.dir)}#${d.curr.name}" title="${escapeHtml(d.curr.dirname)}">..</a>` : '' }
+        ${d.next ? `<a href="/view?path=${encodeURIComponent(d.next.full)}" id="next" title="${escapeHtml(d.next.name)}">Next</a>` : '' }
       </div>
 		</div>
 	</div>
