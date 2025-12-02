@@ -6,7 +6,9 @@
   "keywords": [
     "image viewer"
   ],
-  "bin": "./bin/cli.js",
+  "bin": {
+    "comic-viewer": "bin/cli.js"
+  },
   "scripts": {
     "start": "node bin/cli.js --start",
     "stop": "node bin/cli.js --stop",
@@ -44,5 +46,11 @@
   "devDependencies": {
     "eslint": "^9.39.1"
   },
-  "preferGlobal": true
+  "preferGlobal": true,
+  "files": [
+    "bin/",
+    "lib/",
+    "public/",
+    "views/"
+  ]
 }
