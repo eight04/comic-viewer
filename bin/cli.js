@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 var doc = `Comic Viewer
 
 Usage:
@@ -16,13 +17,16 @@ Options:
   --version             Show version number.`;
 
 var docopt = require("docopt"),
-	mkdirp = require("mkdirp"),
+	{mkdirp} = require("mkdirp"),
 	process = require("process"),
 	fs = require("fs"),
+  path = require("path"),
+  promiseSpawn = require("@npmcli/promise-spawn"),
+  // {default: opener, apps: openerApps} = require("open"),
+  {default: envPaths} = require("env-paths"),
 	
 	args = docopt.docopt(doc, {version: "0.3.1"}),
-	path = require("path-extra"),
-	appDir = path.datadir("comic-viewer"),
+	appDir = envPaths("comic-viewer").data,
 	lock = path.join(appDir, "lock"),
 	
 	server = {
@@ -30,41 +34,46 @@ var docopt = require("docopt"),
 		isLocked: null
 	},
 	
-	createCV = require("../lib/comic-viewer");
+	createComicViewer = require("../lib/comic-viewer");
 	
-function launchFile() {
+async function launchFile() {
 	if (!args["<file>"]) {
 		return;
 	}
 	var url = "http://localhost:" + args["--port"] + "/view?path=" + encodeURIComponent(args["<file>"]);
 	
-	require("open")(url, args["--run-with"]);
+  const browser = args["--run-with"] || null;
+  if (browser) {
+    await promiseSpawn.open([browser, url]);
+  } else {
+    await promiseSpawn.open(url);
+  }
 }
 
-function createLock() {
+async function createLock() {
 	console.log("Server started at port:" + args["--port"]);
-	mkdirp(appDir, function(err) {
-		if (err && err.code != "EEXIST") {
-			console.err(err);
-			exit();
-			return;
-		}
-		fs.writeFile(lock, String(process.pid), function(err) {
-			if (err) {
-				console.err(err);
-				exit();
-				return;
-			}
-			// handle SIGINT
-			process.on("SIGINT", function(){
-				exit();
-			});
-		});
-	});
+  try {
+    await mkdirp(appDir);
+  } catch (err) {
+    console.err(err);
+    exit();
+    return;
+  }
+  fs.writeFile(lock, String(process.pid), function(err) {
+    if (err) {
+      console.err(err);
+      exit();
+      return;
+    }
+    // handle SIGINT
+    process.on("SIGINT", function(){
+      exit();
+    });
+  });
 }
 
 function startServer() {
-	createCV(args["--port"], createLock, exit);
+	createComicViewer(args["--port"], createLock, exit);
 }
 
 function exit() {
