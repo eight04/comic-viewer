@@ -25,7 +25,7 @@ var docopt = require("docopt"),
   // {default: opener, apps: openerApps} = require("open"),
   {default: envPaths} = require("env-paths"),
 	
-	args = docopt.docopt(doc, {version: "0.3.1"}),
+	args = docopt.docopt(doc, {version: "0.4.0"}),
 	appDir = envPaths("comic-viewer").data,
 	lock = path.join(appDir, "lock"),
 	
