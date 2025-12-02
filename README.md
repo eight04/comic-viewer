@@ -61,10 +61,16 @@ Related apps
 
 Changelog
 ---------
+* 0.4.1 (Dec 2, 2025)
+
+  - Fix: exclude unwanted files in package.
+
 * 0.4.0 (Dec 2, 2025)
+
   - Update dependencies.
   - Fix security issues. Now `open` command can only start folders and images.
   - Add: use natsort.
+  
 * 0.3.1 (Apr 12, 2016)
 	- Fix `bower command not found` bug.
 * 0.3.0 (Apr 12, 2016)
