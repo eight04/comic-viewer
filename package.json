@@ -33,15 +33,16 @@
     "@npmcli/promise-spawn": "^9.0.1",
     "body-parser": "^2.2.1",
     "docopt": "^0.6.2",
-    "ejs": "^3.1.10",
     "env-paths": "^3.0.0",
     "express": "^5.2.1",
+    "express-tl": "^1.1.0",
     "fetchival": "https://github.com/typicode/fetchival/archive/v0.3.2.tar.gz",
     "is-image": "^4.0.0",
     "mkdirp": "^3.0.1",
     "mousetrap": "https://github.com/mousetrap-js/mousetrap/archive/1.5.5.tar.gz",
     "natsort": "^2.0.3",
-    "sync-version": "^1.1.0"
+    "sync-version": "^1.1.0",
+    "template-literal": "^1.0.4"
   },
   "devDependencies": {
     "eslint": "^9.39.1"

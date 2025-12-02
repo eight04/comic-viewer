@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title><%= curr.name %></title>
+  <title>${d.curr.name}</title>
 	<link rel="stylesheet" href="/viewer.css">
 	<style id="hide-cursor-style">
 		::-webkit-scrollbar {
@@ -12,8 +12,8 @@
 	<script src="/mousetrap-js/mousetrap.js"></script>
 	<script src="/fetchival/index.js"></script>
 	<script>
-		var cv = <%- comicViewer %>,
-			match;
+    var cv = ${d.comicViewer};
+    var match;
 		
 		// check isfile
 		if (cv.isFile) {
@@ -26,7 +26,7 @@
 	<div class="container">
 		<div class="container-inner">
 			<div class="nav">
-				<a class="title main"><%= curr.name %></a>
+        <a class="title main">${d.curr.name}</a>
 				<div class="right">
 					<a class="command-explorer">Explorer</a>
 					<a class="command-bookmarks">Bookmarks</a>
@@ -34,33 +34,27 @@
 				</div>
 			</div>
 			<div class="images">
-				<% files.forEach(function(file){ 
-					if (/\.(jpg|jpeg|png|gif)$/i.test(file.name)) { %>
-						<img src="/src?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>">
-					<% }
-				}) %>
+        ${d.files.map(file => {
+          if (/\.(jpg|jpeg|png|gif)$/i.test(file.name)) {
+            return `<img src="/src?path=${encodeURIComponent(file.full)}" id="${file.name}">`;
+          } else {
+            return '';
+          }
+        }).join('')}
 			</div>
-			<% if (dirs.length) { %>
-				<div class="dir-controls">
-					<input type="text" class="dir-search-box">
-				</div>
-			<% } %>
+      ${d.dirs.length ? `<div class="dir-controls">
+        <input type="text" class="dir-search-box">
+      </div>` : ''}
 			<div class="dirs">
-				<% dirs.forEach(function(file){ %>
-					<a href="/view?path=<%= encodeURIComponent(file.full) %>" id="<%= file.name %>"><%= file.name %></a>
-				<% }) %>
+        ${d.dirs.map(file =>
+          `<a href="/view?path=${encodeURIComponent(file.full)}" id="${file.name}">${file.name}</a>`
+          ).join('')}
 			</div>
 			<div class="controls">
-				<% if (prev) { %>
-					<a href="/view?path=<%= encodeURIComponent(prev.full) %>" id="prev" title="<%= prev.name %>">Prev</a>
-				<% } %>
-				<% if (curr.dir) { %>
-					<a href="/view?path=<%= encodeURIComponent(curr.dir) + "#" + curr.name %>" title="<%= curr.dirname %>">..</a>
-				<% } %>
-				<% if (next) { %>
-					<a href="/view?path=<%= encodeURIComponent(next.full) %>" id="next" title="<%= next.name %>">Next</a>
-				<% } %>
-			</div>
+        ${d.prev ?  `<a href="/view?path=${encodeURIComponent(d.prev.full)}" id="prev" title="${d.prev.name}">Prev</a>` : '' }
+        ${d.curr.dir ? `<a href="/view?path=${encodeURIComponent(d.curr.dir)}#${d.curr.name}" title="${d.curr.dirname}">..</a>` : '' }
+        ${d.next ? `<a href="/view?path=${encodeURIComponent(d.next.full)}" id="next" title="${d.next.name}">Next</a>` : '' }
+      </div>
 		</div>
 	</div>
 	<div class="layers">
