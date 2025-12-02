@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/eight04/comic-viewer#readme",
   "dependencies": {
+    "@npmcli/promise-spawn": "^9.0.1",
     "body-parser": "^2.2.1",
     "docopt": "^0.6.2",
     "ejs": "^3.1.10",
@@ -38,7 +39,6 @@
     "mkdirp": "^3.0.1",
     "mousetrap": "https://github.com/mousetrap-js/mousetrap/archive/1.5.5.tar.gz",
     "natsort": "^2.0.3",
-    "open": "11.0.0",
     "sync-version": "^1.1.0"
   },
   "devDependencies": {

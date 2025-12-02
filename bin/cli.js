@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 var doc = `Comic Viewer
 
 Usage:
@@ -20,7 +21,8 @@ var docopt = require("docopt"),
 	process = require("process"),
 	fs = require("fs"),
   path = require("path"),
-  {default: opener, apps: openerApps} = require("open"),
+  promiseSpawn = require("@npmcli/promise-spawn"),
+  // {default: opener, apps: openerApps} = require("open"),
   {default: envPaths} = require("env-paths"),
 	
 	args = docopt.docopt(doc, {version: "0.3.1"}),
@@ -34,22 +36,18 @@ var docopt = require("docopt"),
 	
 	createComicViewer = require("../lib/comic-viewer");
 	
-function launchFile() {
+async function launchFile() {
 	if (!args["<file>"]) {
 		return;
 	}
 	var url = "http://localhost:" + args["--port"] + "/view?path=" + encodeURIComponent(args["<file>"]);
 	
   const browser = args["--run-with"] || null;
-  const options = {};
   if (browser) {
-    if (openerApps[browser]) {
-      options.app = {name: openerApps[browser]};
-    } else {
-      options.app = {name: browser};
-    }
+    promiseSpawn.open([browser, url]);
+  } else {
+    promiseSpawn.open(url);
   }
-	opener(url, options);
 }
 
 async function createLock() {
