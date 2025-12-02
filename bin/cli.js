@@ -44,9 +44,9 @@ async function launchFile() {
 	
   const browser = args["--run-with"] || null;
   if (browser) {
-    promiseSpawn.open([browser, url]);
+    await promiseSpawn.open([browser, url]);
   } else {
-    promiseSpawn.open(url);
+    await promiseSpawn.open(url);
   }
 }
 
