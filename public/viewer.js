@@ -1,3 +1,5 @@
+/* global cv, fetchival, Mousetrap */
+
 function prepend(node, child) {
 	if (typeof node == "string") {
 		node = document.querySelector(node);
@@ -393,18 +395,18 @@ function init() {
 	var panel = function(){
 		var timer, x, y,
 			hideStyle = document.querySelector("#hide-cursor-style"),
-			nav = document.querySelector(".nav"),
-			inner = document.querySelector(".container-inner"),
+			// nav = document.querySelector(".nav"),
+			// inner = document.querySelector(".container-inner"),
 			notifyEl = document.querySelector(".notify");
 		
 		function show() {
-			var scrWidth,
-				scrTop = window.scrollY;
+			// var scrWidth,
+		  const scrTop = window.scrollY;
 				
 			document.body.classList.add("show-cursor");
 			document.head.removeChild(hideStyle);
 			
-			scrWidth = document.documentElement.clientWidth - window.innerWidth + "px";
+			// scrWidth = document.documentElement.clientWidth - window.innerWidth + "px";
 			// nav.style.marginRight = scrWidth;
 			// inner.style.marginRight = scrWidth;
 			
@@ -488,7 +490,7 @@ function init() {
 		}
 		
 		function escapeRE(str) {
-			return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+			return str.replace(/[-[\]/{}()*+?.\\^$|]/g, "\\$&");
 		}
 	
 		function filter(value) {

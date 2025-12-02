@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node bin/cli.js --start",
     "stop": "node bin/cli.js --stop",
-    "test": "eslint */*.js",
+    "test": "eslint .",
     "sync-version": "sync-version bin/cli.js",
     "preversion": "npm test",
     "version": "npm run sync-version && git add .",
